@@ -1,0 +1,10 @@
+{
+  "name": "bosh-releaese-tracker-labeller",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Jonathan Berney",
+  "license": "ISC"
+}

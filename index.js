@@ -1,0 +1,1 @@
+require('./src/bosh-release-tracker-labeller').labelStories(process.env);
