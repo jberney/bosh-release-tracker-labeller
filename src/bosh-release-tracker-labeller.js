@@ -10,17 +10,16 @@ const getShas = async (tag, opts) =>
     .reduce((memo, [repo, sha]) => ({...memo, [repo]: sha}), {});
 
 module.exports = {
-  async labelStories({RELEASE_NAME, RELEASE_REPO, TAG, TRACKER_TOKEN}) {
-    const label = `${RELEASE_NAME}-${TAG}`;
-    console.log({RELEASE_NAME, RELEASE_REPO, TAG, label});
+  async labelStories({RELEASE_NAME, RELEASE_REPO, TRACKER_TOKEN}) {
+    const [previousTag, tag] = process.argv.slice(2);
+
+    const label = `${RELEASE_NAME}-${tag}`;
+    console.log({RELEASE_NAME, RELEASE_REPO, previousTag, tag, label});
 
     const opts = repo => ({cwd: `../${repo}`});
     const releaseOpts = opts(RELEASE_REPO);
 
-    const previousTag = await GitHelper.getPreviousTag(TAG, releaseOpts);
-    console.log({previousTag});
-
-    const tagShas = await getShas(TAG, releaseOpts);
+    const tagShas = await getShas(tag, releaseOpts);
     console.log({tagShas});
 
     const previousTagShas = await getShas(previousTag, releaseOpts);

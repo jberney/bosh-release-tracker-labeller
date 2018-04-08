@@ -6,4 +6,4 @@ Environment variables:
 * `TRACKER_TOKEN`
 * `TAG`
 
-Usage: `npm start`
+Usage: `npm start OLD_TAG NEW_TAG`
