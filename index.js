@@ -1,1 +1,1 @@
-require('./src/bosh-release-tracker-labeller').labelStories(process.env);
+require('./src/bosh-release-tracker-labeller').labelStories(process.env).catch(e => (console.error(e), process.exit(1)));
