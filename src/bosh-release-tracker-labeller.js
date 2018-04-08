@@ -10,16 +10,31 @@ const getShas = async (tag, opts) =>
     .reduce((memo, [repo, sha]) => ({...memo, [repo]: sha}), {});
 
 module.exports = {
-  async labelStories({RELEASE_NAME, RELEASE_REPO, TAG, TRACKER_PROJECT_ID, TRACKER_TOKEN}) {
+  async labelStories({RELEASE_NAME, RELEASE_REPO, TAG, TRACKER_TOKEN}) {
+    const label = `${RELEASE_NAME}-${TAG}`;
+    console.log({RELEASE_NAME, RELEASE_REPO, TAG, label});
+
     const opts = repo => ({cwd: `../${repo}`});
     const releaseOpts = opts(RELEASE_REPO);
+
     const previousTag = await GitHelper.getPreviousTag(TAG, releaseOpts);
+    console.log({previousTag});
+
     const tagShas = await getShas(TAG, releaseOpts);
+    console.log({tagShas});
+
     const previousTagShas = await getShas(previousTag, releaseOpts);
-    (await Promise.all(Object.keys(tagShas)
+    console.log({previousTagShas});
+
+    const commits = await Promise.all(Object.keys(tagShas)
       .filter(repo => previousTagShas[repo] !== tagShas[repo])
-      .map(repo => GitHelper.getCommits(previousTagShas[repo], tagShas[repo], opts(repo)))))
-      .reduce((memo, [...messages]) => [...memo, ...TrackerHelper.getStoryNumbers(messages)], [])
-      .map(storyNumber => TrackerHelper.addLabel(TRACKER_PROJECT_ID, storyNumber, `${RELEASE_NAME}-${TAG}`, TRACKER_TOKEN));
+      .map(repo => GitHelper.getCommits(previousTagShas[repo], tagShas[repo], opts(repo))));
+    const storyIds = Array.from(commits.map(TrackerHelper.getStoryIds)
+      .reduce((memo, storyIds) => (storyIds.forEach(memo.add, memo), memo), new Set()));
+    console.log({storyIds});
+
+    (await Promise.all(storyIds.map(storyId => TrackerHelper.getStory(storyId, TRACKER_TOKEN))))
+      .filter(({labels}) => !labels.find(({name}) => name === label))
+      .map(({id, project_id}) => TrackerHelper.addLabel(project_id, id, label, TRACKER_TOKEN));
   }
 };
